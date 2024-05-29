@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DMRWebScrapper_service.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api")]
     public class LicensePlateController : ControllerBase
     {
 
@@ -17,7 +17,7 @@ namespace DMRWebScrapper_service.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "Getinfo")]
+        [HttpGet("{nummerplade}")]
 
         public async Task<IActionResult> Get(string nummerplade)
         {
