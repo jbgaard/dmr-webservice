@@ -217,7 +217,7 @@
                         i++;
                         break;
                     case "Status:":
-                        bildata.Forsikring.Aktivt = next.ToLower() == "aktiv";
+                        bildata.Forsikring.Aktiv = next.ToLower() == "aktiv";
                         i++;
                         break;
                     case "Oprettet:":
