@@ -18,6 +18,7 @@ namespace DMRWebScrapper_service.Controllers
         }
 
         [HttpGet("{nummerplade}")]
+		[EnableCors]
 
         public async Task<IActionResult> Get(string nummerplade)
         {
