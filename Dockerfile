@@ -9,17 +9,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["DMRWebScrapper service.csproj", "."]
-RUN dotnet restore "./DMRWebScrapper service.csproj"
+COPY ["DMRWebservice.csproj", "."]
+RUN dotnet restore "./DMRWebservice.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "./DMRWebScrapper service.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./DMRWebservice.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./DMRWebScrapper service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./DMRWebservice.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "DMRWebScrapper service.dll"]
+ENTRYPOINT ["dotnet", "DMRWebservice.dll"]
