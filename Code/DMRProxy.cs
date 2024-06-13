@@ -372,7 +372,7 @@
                         }
                         break;
 
-                    case "Registrerings&shy;nummer:":
+                    case "Registreringsnummer:":
                         bildata.Køretøj.Registreringsforhold.RegistreringsNummer = next;
                         i++;
                         break;
