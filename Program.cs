@@ -9,6 +9,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add singleton
+builder.Services.AddSingleton(new DMRProxy());
+
 // Add cors
 builder.Services.AddCors(options =>
 {
@@ -20,9 +23,6 @@ builder.Services.AddCors(options =>
 				.AllowAnyHeader();
 		});
 });
-
-// Add the DMRProxyCache to the services
-builder.Services.AddSingleton<DMRProxyCache>();
 
 var app = builder.Build();
 

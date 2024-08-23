@@ -16,6 +16,11 @@
     /// </summary>
     public class DMRProxy
     {
+
+        // CachingServices
+        private static CachingService _bildataCahcingService = new CachingService(typeof(Bildata));
+        private static CachingService _bildataMinCahcingService = new CachingService(typeof(BildataMin));
+
         /// <summary>
         /// Hent oplysninger fra Motorregister
         /// </summary>
@@ -24,6 +29,15 @@
         /// <returns></returns>
         public static async Task<Bildata?> HentOplysninger(string regnr, DateTime dato)
         {
+            // Try to get the object from the cache
+            var cachedObject = _bildataCahcingService.GetFromCache(regnr);
+
+            // Check if the object is in the cache
+            if (cachedObject != null)
+            {
+                return (Bildata)cachedObject;
+            }
+
             CookieContainer CookieJar = new CookieContainer();
             HttpClientHandler handler = new HttpClientHandler { CookieContainer = CookieJar };
             HttpClient client = new HttpClient(handler);
@@ -144,12 +158,25 @@
                 throw new Exception( "Motorregisteret er utilgængeligt");
             }
 
+            // Add the object to the cache
+            _bildataCahcingService.AddToCache(regnr, bildata);
+
             return bildata;
         }
 
         // Minified version of HentOplysninger only with basic info, and forsikring info. No historical data
         public static async Task<BildataMin?> HentOplysningerMin(string regnr)
         {
+
+            // Try to get the object from the cache
+            var cachedObject = _bildataMinCahcingService.GetFromCache(regnr);
+
+            // Check if the object is in the cache
+            if (cachedObject != null)
+            {
+                return (BildataMin)cachedObject;
+            }
+
             CookieContainer CookieJar = new CookieContainer();
             HttpClientHandler handler = new HttpClientHandler { CookieContainer = CookieJar };
             HttpClient client = new HttpClient(handler);
@@ -221,6 +248,9 @@
             // Copy data from Bildata to BildataMin
             bildataMin.Køretøj = bildata.Køretøj;
             bildataMin.Forsikring = bildata.Forsikring;
+
+            // Add the object to the cache
+            _bildataMinCahcingService.AddToCache(regnr, bildataMin);
 
             return bildataMin;
         }

@@ -9,30 +9,24 @@ namespace DMRWebScrapper_service.Controllers
     public class LicensePlateController : ControllerBase
     {
 
-		// Dependency injection of the DMRProxyCache
-		private readonly DMRProxyCache DMRProxyCache;
-
+        // Logger
         private readonly ILogger<LicensePlateController> _logger;
 
-        public LicensePlateController(ILogger<LicensePlateController> logger, DMRProxyCache dmrProxyCache)
+        // Proxy
+        private readonly DMRProxy _proxy;
+
+        public LicensePlateController(ILogger<LicensePlateController> logger, DMRProxy proxy)
 		{
 			_logger = logger;
-			DMRProxyCache = dmrProxyCache;
+            _proxy = proxy;
 		}
 
+        // Get car data
         [HttpGet("{nummerplade}")]
         public async Task<IActionResult> Get(string nummerplade)
         {
             try
             {
-                // Check if the data is in the cache
-                BildataCaching? cachedData = BildataCache.FirstOrDefault(x => x.Bildata.Køretøj.Registreringsforhold.RegistreringsNummer == nummerplade);
-
-                // If the data is in the cache and it is not older than 14 days, return the cached data
-                if (cachedData != null && cachedData.LastUpdated.AddDays(14) > DateTime.Now)
-                {
-                    return Ok(cachedData.Bildata);
-                }
 
                 // Get the data from the DMRProxy
                 Bildata? bildata = await DMRProxy.HentOplysninger(nummerplade, DateTime.Now);
@@ -42,13 +36,6 @@ namespace DMRWebScrapper_service.Controllers
                 {
                     return NotFound();
                 }
-
-                // If the data is not in the cache, add it to the cache
-                BildataCaching bildataCaching = new BildataCaching
-                {
-                    Bildata = bildata,
-                    LastUpdated = DateTime.Now
-                };
 
                 return Ok(bildata);
             }
@@ -65,14 +52,6 @@ namespace DMRWebScrapper_service.Controllers
         {
             try
             {
-                // Check if the data is in the cache
-                BildataMinCaching? cachedData = BildataMinCache.FirstOrDefault(x => x.BildataMin.Køretøj.Registreringsforhold.RegistreringsNummer == nummerplade);
-
-                // If the data is in the cache and it is not older than 14 days, return the cached data
-                if (cachedData != null && cachedData.LastUpdated.AddDays(14) > DateTime.Now)
-                {
-                    return Ok(cachedData.BildataMin);
-                }
 
                 // Get the data from the DMRProxy
                 BildataMin? bildata = await DMRProxy.HentOplysningerMin(nummerplade);
@@ -82,13 +61,6 @@ namespace DMRWebScrapper_service.Controllers
                 {
                     return NotFound();
                 }
-
-                // If the data is not in the cache, add it to the cache
-                BildataMinCaching bildataCaching = new BildataMinCaching
-                {
-                    BildataMin = bildata,
-                    LastUpdated = DateTime.Now
-                };
 
                 return Ok(bildata);
             }
