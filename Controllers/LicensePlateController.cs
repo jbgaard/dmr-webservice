@@ -9,31 +9,16 @@ namespace DMRWebScrapper_service.Controllers
     public class LicensePlateController : ControllerBase
     {
 
+		// Dependency injection of the DMRProxyCache
+		private readonly DMRProxyCache DMRProxyCache;
 
         private readonly ILogger<LicensePlateController> _logger;
 
-        public LicensePlateController(ILogger<LicensePlateController> logger)
-        {
-            _logger = logger;
-        }
-
-        // Class for BildataCaching
-        class BildataCaching
-        {
-            public Bildata Bildata { get; set; }
-            public DateTime LastUpdated { get; set; }
-        }
-
-        // Class for BildataMinCaching
-        class BildataMinCaching
-        {
-            public BildataMin BildataMin { get; set; }
-            public DateTime LastUpdated { get; set; }
-        }
-
-        // Lists for caching
-        private static List<BildataCaching> BildataCache = new List<BildataCaching>();
-        private static List<BildataMinCaching> BildataMinCache = new List<BildataMinCaching>();
+        public LicensePlateController(ILogger<LicensePlateController> logger, DMRProxyCache dmrProxyCache)
+		{
+			_logger = logger;
+			DMRProxyCache = dmrProxyCache;
+		}
 
         [HttpGet("{nummerplade}")]
         public async Task<IActionResult> Get(string nummerplade)

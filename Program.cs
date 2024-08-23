@@ -1,3 +1,5 @@
+using DMRWebScrapper_service.Code;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -18,6 +20,9 @@ builder.Services.AddCors(options =>
 				.AllowAnyHeader();
 		});
 });
+
+// Add the DMRProxyCache to the services
+builder.Services.AddSingleton<DMRProxyCache>();
 
 var app = builder.Build();
 
