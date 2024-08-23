@@ -19,7 +19,6 @@
 
         // CachingServices
         private static CachingService _bildataCahcingService = new CachingService(typeof(Bildata));
-        private static CachingService _bildataMinCahcingService = new CachingService(typeof(BildataMin));
 
         /// <summary>
         /// Hent oplysninger fra Motorregister
@@ -169,7 +168,7 @@
         {
 
             // Try to get the object from the cache
-            var cachedObject = _bildataMinCahcingService.GetFromCache(regnr);
+            var cachedObject = _bildataCahcingService.GetFromCache($"min{regnr}");
 
             // Check if the object is in the cache
             if (cachedObject != null)
@@ -250,7 +249,7 @@
             bildataMin.Forsikring = bildata.Forsikring;
 
             // Add the object to the cache
-            _bildataMinCahcingService.AddToCache(regnr, bildataMin);
+            _bildataCahcingService.AddToCache($"min{regnr}", bildataMin);
 
             return bildataMin;
         }
