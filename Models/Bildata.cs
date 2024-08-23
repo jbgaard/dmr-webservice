@@ -20,4 +20,16 @@
             Forsikring = new DMRForsikring();
         }
     }
+
+    public class BildataMin
+    {
+        public DMRKøretøj Køretøj { get; set; }
+
+        public DMRForsikring Forsikring { get; set; }
+        public BildataMin()
+        {
+            Køretøj = new DMRKøretøj();
+            Forsikring = new DMRForsikring();
+        }
+    }
 }

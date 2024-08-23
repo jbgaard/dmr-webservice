@@ -147,6 +147,84 @@
             return bildata;
         }
 
+        // Minified version of HentOplysninger only with basic info, and forsikring info. No historical data
+        public static async Task<BildataMin?> HentOplysningerMin(string regnr)
+        {
+            CookieContainer CookieJar = new CookieContainer();
+            HttpClientHandler handler = new HttpClientHandler { CookieContainer = CookieJar };
+            HttpClient client = new HttpClient(handler);
+            string Token = "";
+            Bildata bildata = new Bildata();
+
+            var startPage = await client.GetAsync("https://motorregister.skat.dk/dmr-kerne/dk/skat/dmr/front/portlets/koeretoejdetaljer/visKoeretoej/VisKoeretoejController.jpf");
+
+            if (startPage.IsSuccessStatusCode)
+            {
+                var content = await startPage.Content.ReadAsStringAsync();
+
+                var tokenElement = Regex.Matches(content, "<input[^>]+?dmrFormToken[^>]+?>", RegexOptions.IgnoreCase)[0].Value;
+                Token = XElement.Parse(tokenElement).Attribute("value").Value;
+
+                //var radioElement = Regex.Matches(content, "<input[^>]+?REGISTRERINGSNUMMER[^>]+?>", RegexOptions.IgnoreCase)[0].Value;
+                //Radio = XElement.Parse(radioElement).Attribute("name").Value;
+
+                //var textElement = Regex.Matches(content, "<input[^>]+?soegeord[^>]+?>", RegexOptions.IgnoreCase)[0].Value;
+                //PlateField = XElement.Parse(textElement).Attribute("name").Value;
+
+
+
+                var formContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("dmrFormToken", Token),
+                    new KeyValuePair<string, string>("wlw-radio_button_group_key:{actionForm.soegekriterie}", "REGISTRERINGSNUMMER"),
+                    new KeyValuePair<string, string>("{actionForm.soegeord}", regnr),
+                });
+
+                HttpResponseMessage MotorInfo1 = await client.PostAsync("https://motorregister.skat.dk/dmr-kerne/dk/skat/dmr/front/portlets/koeretoej/nested/fremsoegKoeretoej/search.do", formContent);
+                HttpResponseMessage? MotorInfo2 = null;
+
+                if (MotorInfo1.IsSuccessStatusCode)
+                {
+                    var MotorResult = await MotorInfo1.Content.ReadAsStringAsync();
+
+                    // Fail Fast...
+                    if (MotorResult.Contains("Ingen køretøjer fundet."))
+                    {
+                        return null;
+                    }
+
+                    
+                    else
+                    {
+                        MotorInfo2 = await client.GetAsync("https://motorregister.skat.dk/dmr-kerne/dk/skat/dmr/front/portlets/koeretoejdetaljer/nested/visKoeretoej/selectTab.do?dmr_tabset_tab=3");
+                    }
+
+                    ParseKøretøjData(bildata, MotorResult);
+
+                    if (MotorInfo2.IsSuccessStatusCode)
+                    {
+                        var MotorResult4 = await MotorInfo2.Content.ReadAsStringAsync();
+                        ParseForsikringData(bildata, MotorResult4);
+
+                    }
+
+                }
+            }
+            else
+            {
+                throw new Exception("Motorregisteret er utilgængeligt");
+            }
+
+            // Bildata min
+            BildataMin bildataMin = new BildataMin();
+
+            // Copy data from Bildata to BildataMin
+            bildataMin.Køretøj = bildata.Køretøj;
+            bildataMin.Forsikring = bildata.Forsikring;
+
+            return bildataMin;
+        }
+
         private static void ParseAfgiftsData(Bildata bildata, string MotorResult)
         {
             List<string> tokens = Tokenizer(MotorResult);

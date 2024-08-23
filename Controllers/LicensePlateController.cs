@@ -31,5 +31,21 @@ namespace DMRWebScrapper_service.Controllers
                 throw ex;
             }
         }
+
+        // Minified version of car data
+        [HttpGet("minified/{nummerplade}")]
+        public async Task<IActionResult> GetMinified(string nummerplade)
+        {
+            try
+            {
+                BildataMin bildata = await DMRProxy.HentOplysningerMin(nummerplade);
+                return Ok(bildata);
+            }
+            catch
+            (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

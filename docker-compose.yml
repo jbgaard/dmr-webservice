@@ -1,0 +1,31 @@
+version: '3.7'
+services:
+
+    dmrWebService:
+        image: dmrwebservice
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "8080:80"
+        depends_on:
+            - db-mongo
+        environment:
+            - ConnectionStrings__DefaultConnection=Server=db-mssql;Database=DMR;User=sa;Password=fZmoHXzoaviercPtryU8
+
+    db-mongo:
+        image: mongodb/mongodb-community-server:latest
+        ports:
+          - '27017:27017'
+        container_name: db-mongo
+        volumes:
+          - mongo_data:/data/db
+        environment:
+          - MONGO_INITDB_ROOT_USERNAME=root
+          - MONGO_INITDB_ROOT_PASSWORD=mySecretPassword
+
+volumes:
+  sql_data:
+  sql_log:  
+  sql_secrets:
+  mongo_data:  
