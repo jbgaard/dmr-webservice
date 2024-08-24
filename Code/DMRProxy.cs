@@ -18,7 +18,7 @@
     {
 
         // CachingServices
-        private static CachingService _bildataCahcingService = new CachingService(typeof(Bildata));
+        private static CachingService _bildataCahcingService = new CachingService();
 
         /// <summary>
         /// Hent oplysninger fra Motorregister
@@ -41,10 +41,6 @@
             HttpClientHandler handler = new HttpClientHandler { CookieContainer = CookieJar };
             HttpClient client = new HttpClient(handler);
             string Token = "";
-            string Radio = "";
-            string PlateField = "";
-            string HistoriskText = "";
-            string HistoriskKnap = "";
             Bildata bildata = new Bildata();
 
             var startPage = await client.GetAsync("https://motorregister.skat.dk/dmr-kerne/dk/skat/dmr/front/portlets/koeretoejdetaljer/visKoeretoej/VisKoeretoejController.jpf");
@@ -54,6 +50,7 @@
                 var content = await startPage.Content.ReadAsStringAsync();
 
                 var tokenElement = Regex.Matches(content, "<input[^>]+?dmrFormToken[^>]+?>", RegexOptions.IgnoreCase)[0].Value;
+
                 Token = XElement.Parse(tokenElement).Attribute("value").Value;
 
                 //var radioElement = Regex.Matches(content, "<input[^>]+?REGISTRERINGSNUMMER[^>]+?>", RegexOptions.IgnoreCase)[0].Value;
@@ -72,7 +69,7 @@
                 });
 
                 HttpResponseMessage MotorInfo1 = await client.PostAsync("https://motorregister.skat.dk/dmr-kerne/dk/skat/dmr/front/portlets/koeretoej/nested/fremsoegKoeretoej/search.do", formContent);
-                HttpResponseMessage MotorInfo2 = null,
+                HttpResponseMessage? MotorInfo2 = null,
                                     MotorInfo3 = null,
                                     MotorInfo4 = null,
                                     MotorInfo5 = null;
@@ -125,26 +122,26 @@
 
                     ParseKøretøjData(bildata, MotorResult);
 
-                    if (MotorInfo2.IsSuccessStatusCode)
+                    if (MotorInfo2 != null && MotorInfo2.IsSuccessStatusCode)
                     {
                         var MotorResult2 = await MotorInfo2.Content.ReadAsStringAsync();
 
                         ParseTekniskeData(bildata, MotorResult2);
                     }
 
-                    if (MotorInfo3.IsSuccessStatusCode)
+                    if (MotorInfo3 != null && MotorInfo3.IsSuccessStatusCode)
                     {
                         var MotorResult3 = await MotorInfo3.Content.ReadAsStringAsync();
 
                         ParseSynsData(bildata, MotorResult3);
                     }
-                    if (MotorInfo4.IsSuccessStatusCode)
+                    if (MotorInfo4 != null && MotorInfo4.IsSuccessStatusCode)
                     {
-                        var MotorResult4 =await MotorInfo4.Content.ReadAsStringAsync();
+                        var MotorResult4 = await MotorInfo4.Content.ReadAsStringAsync();
                         ParseForsikringData(bildata, MotorResult4);
 
                     }
-                    if (MotorInfo5.IsSuccessStatusCode)
+                    if (MotorInfo5 != null && MotorInfo5.IsSuccessStatusCode)
                     {
                         var MotorResult5 = await MotorInfo5.Content.ReadAsStringAsync();
 

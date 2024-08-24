@@ -3,31 +3,53 @@
     public class CachingService
     {
 
-        // Type of object to cache
-        public Type Type { get; set; }
-
         // Dictionary to store the cached objects
-        private Dictionary<string, object> _cache;
+        private Dictionary<string, CacheObject> _cache;
+
+        // Class
+        private class CacheObject
+        {
+            public object obj;
+            public DateTime timeAdded;
+
+            // Constructor
+            public CacheObject(object obj)
+            {
+                this.obj = obj;
+                timeAdded = DateTime.Now;
+            }
+        }
 
         // Constructor
-        public CachingService(Type type)
+        public CachingService()
         {
-            Type = type;
-            _cache = new Dictionary<string, object>();
+            _cache = new Dictionary<string, CacheObject>();
         }
 
         // Add object to the cache
         public void AddToCache(string key, object obj)
         {
-            _cache.Add(key, obj);
+
+            // Create new CacheObject
+            CacheObject cacheObject = new CacheObject(obj);
+
+            _cache.Add(key, cacheObject);
         }
 
         // Get object from the cache
-        public object GetFromCache(string key)
+        public object? GetFromCache(string key)
         {
             if (_cache.ContainsKey(key))
             {
-                return _cache[key];
+
+                // If the object is older than 7 days, remove it from the cache
+                if (_cache[key].timeAdded.AddDays(7) < DateTime.Now)
+                {
+                    _cache.Remove(key);
+                    return null;
+                }
+
+                return _cache[key].obj;
             }
             else
             {
