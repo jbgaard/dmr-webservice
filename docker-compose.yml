@@ -13,14 +13,13 @@ services:
             MONGODB_CONNECTION_STRING: mongodb://mongo:27017
 
     mongo:
-        image: mongodb/mongodb-community-server:latest
+        image: mongo
         container_name: db-mongo
         volumes:
           - mongo_data:/data/db
 
 volumes:
     mongo_data:  
-  
 
 networks:
     net:
