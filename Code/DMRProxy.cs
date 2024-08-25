@@ -1,6 +1,7 @@
 ﻿namespace DMRWebScrapper_service.Code
 {
     using DMRWebScrapper_service.Models;
+    using MongoDB.Driver;
     using System;
     using System.Collections.Generic;
     using System.Net;
@@ -17,8 +18,18 @@
     public class DMRProxy
     {
 
+        // VehicleViewService
+        private readonly VehicleViewService _vehicleViewService;
+
+        // Constructor
+        public DMRProxy(MongoClient mongoClient, VehicleViewService vehicleViewService)
+        {
+            _bildataCahcingService = new CachingService(mongoClient);
+            _vehicleViewService = vehicleViewService;
+        }
+
         // CachingServices
-        private static CachingService _bildataCahcingService = new CachingService();
+        private static CachingService _bildataCahcingService;
 
         /// <summary>
         /// Hent oplysninger fra Motorregister
@@ -26,7 +37,7 @@
         /// <param name="regnr">nummerplade på køretøj</param>
         /// <param name="dato">historisk dato for oplysninger</param>
         /// <returns></returns>
-        public static async Task<Bildata?> HentOplysninger(string regnr, DateTime dato)
+        public  async Task<Bildata?> HentOplysninger(string regnr, DateTime dato)
         {
             // Try to get the object from the cache
             var cachedObject = _bildataCahcingService.GetFromCache(regnr);
@@ -34,7 +45,12 @@
             // Check if the object is in the cache
             if (cachedObject != null)
             {
-                return (Bildata)cachedObject;
+                var bildataObj = (Bildata)cachedObject;
+
+                // VehicleViewReport
+                bildataObj.VehicleViewReport = _vehicleViewService.GetUsageReportsForVehicle(regnr);
+
+                return bildataObj;
             }
 
             CookieContainer CookieJar = new CookieContainer();
@@ -154,6 +170,9 @@
                 throw new Exception( "Motorregisteret er utilgængeligt");
             }
 
+            // VehicleViewReport
+            bildata.VehicleViewReport = _vehicleViewService.GetUsageReportsForVehicle(regnr);
+
             // Add the object to the cache
             _bildataCahcingService.AddToCache(regnr, bildata);
 
@@ -161,7 +180,7 @@
         }
 
         // Minified version of HentOplysninger only with basic info, and forsikring info. No historical data
-        public static async Task<BildataMin?> HentOplysningerMin(string regnr)
+        public async Task<BildataMin?> HentOplysningerMin(string regnr)
         {
 
             // Try to get the object from the cache
@@ -170,7 +189,12 @@
             // Check if the object is in the cache
             if (cachedObject != null)
             {
-                return (BildataMin)cachedObject;
+                var bilDataObj = (BildataMin)cachedObject;
+
+                // VehicleViewReport
+                bilDataObj.VehicleViewReport = _vehicleViewService.GetUsageReportsForVehicle(regnr);
+
+                return bilDataObj;
             }
 
             CookieContainer CookieJar = new CookieContainer();
@@ -244,6 +268,9 @@
             // Copy data from Bildata to BildataMin
             bildataMin.Køretøj = bildata.Køretøj;
             bildataMin.Forsikring = bildata.Forsikring;
+
+            // VehicleViewReport
+            bildataMin.VehicleViewReport = _vehicleViewService.GetUsageReportsForVehicle(regnr);
 
             // Add the object to the cache
             _bildataCahcingService.AddToCache($"min{regnr}", bildataMin);

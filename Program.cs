@@ -1,4 +1,5 @@
 using DMRWebScrapper_service.Code;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +10,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add singleton
-builder.Services.AddSingleton(new DMRProxy());
+// Add MongoDB client, read connection string from environment variable
+builder.Services.AddSingleton(new MongoClient(Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING") ?? "mongodb://localhost:27017"));
+
+// Add DMRProxy as singleton
+builder.Services.AddSingleton<DMRProxy>();
+
+// Add VehicleViewService as singleton
+builder.Services.AddSingleton<VehicleViewService>();
 
 // Add cors
 builder.Services.AddCors(options =>
