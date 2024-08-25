@@ -7,23 +7,21 @@ services:
           net:
             ipv4_address: 172.20.1.15
         depends_on:
-            - db-mongo
+            - mongo
         restart: unless-stopped
         environment:
-            MONGODB_CONNECTION_STRING: mongodb://db-mongo:27017
+            MONGODB_CONNECTION_STRING: mongodb://mongo:27017
 
-    db-mongo:
+    mongo:
         image: mongodb/mongodb-community-server:latest
         container_name: db-mongo
         volumes:
           - mongo_data:/data/db
-        environment:
-          - MONGO_INITDB_ROOT_USERNAME=root
-          - MONGO_INITDB_ROOT_PASSWORD=mySecretPassword
 
 volumes:
     mongo_data:  
   
+
 networks:
     net:
         name: myNetwork
