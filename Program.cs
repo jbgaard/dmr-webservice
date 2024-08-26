@@ -19,6 +19,9 @@ builder.Services.AddSingleton<DMRProxy>();
 // Add VehicleViewService as singleton
 builder.Services.AddSingleton<VehicleViewService>();
 
+// Add PoliceReportService as singleton
+builder.Services.AddSingleton<PoliceReportService>();
+
 // Add cors
 builder.Services.AddCors(options =>
 {

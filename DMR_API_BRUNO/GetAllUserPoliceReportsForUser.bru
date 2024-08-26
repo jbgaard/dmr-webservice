@@ -1,0 +1,15 @@
+meta {
+  name: GetAllUserPoliceReportsForUser
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://localhost:7027/api/police/user/{{user_identifier}}
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: QmFuYW7DhmJsZXJPZ1RvbWF0c292cw==
+}

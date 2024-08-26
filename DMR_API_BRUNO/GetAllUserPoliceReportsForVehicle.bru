@@ -1,0 +1,15 @@
+meta {
+  name: GetAllUserPoliceReportsForVehicle
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://localhost:7027/api/police/{{nummerplade}}/reports
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: QmFuYW7DhmJsZXJPZ1RvbWF0c292cw==
+}

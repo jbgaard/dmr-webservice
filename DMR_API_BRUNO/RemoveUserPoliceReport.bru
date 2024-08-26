@@ -1,0 +1,15 @@
+meta {
+  name: RemoveUserPoliceReport
+  type: http
+  seq: 1
+}
+
+delete {
+  url: https://localhost:7027/api/police/{{nummerplade}}/report
+  body: none
+  auth: none
+}
+
+headers {
+  User-Identifier: {{user_identifier}}
+}
