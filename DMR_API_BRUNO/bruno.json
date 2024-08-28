@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "DMR_API_BRUNO",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
