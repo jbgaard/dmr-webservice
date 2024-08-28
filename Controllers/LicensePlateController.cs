@@ -119,7 +119,7 @@ namespace DMRWebScrapper_service.Controllers
                 policeCheckReturn.bildata = bildata;
 
                 // Check if the car is a police car
-                if (bildata.Forsikring.Forsikring == "SELVFORSIKRING" && bildata.Forsikring.Aktiv)
+                if (bildata.Forsikring.Forsikring != null && bildata.Forsikring.Forsikring.Equals("SELVFORSIKRING", StringComparison.CurrentCultureIgnoreCase))
                 {
                     // Update police check return object
                     policeCheckReturn.isPoliceCar = true;
