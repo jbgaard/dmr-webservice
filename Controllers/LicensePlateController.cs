@@ -24,7 +24,7 @@ namespace DMRWebScrapper_service.Controllers
         private readonly PoliceReportService _policeReportService;
 
         // ADMIN API KEY, if this is defined, all actions are allowed
-        private readonly string ADMIN_API_KEY = Environment.GetEnvironmentVariable("ADMIN_API_KEY") ?? "QmFuYW7DhmJsZXJPZ1RvbWF0c292cw==";
+        private readonly string ADMIN_API_KEY = Environment.GetEnvironmentVariable("ADMIN_API_KEY") ?? "MyVerySecretApiKey";
 
         // Tools
         private readonly Tools _tools;
