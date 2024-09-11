@@ -5,11 +5,11 @@ meta {
 }
 
 get {
-  url: https://localhost:7027/api/police/{{nummerplade}}/reports
+  url: {{base_url}}/api/police/{{nummerplade}}/reports
   body: none
   auth: none
 }
 
 headers {
-  X-API-KEY: QmFuYW7DhmJsZXJPZ1RvbWF0c292cw==
+  X-API-KEY: {{admin_api_key}}
 }
