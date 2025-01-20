@@ -22,6 +22,9 @@ builder.Services.AddSingleton<VehicleViewService>();
 // Add PoliceReportService as singleton
 builder.Services.AddSingleton<PoliceReportService>();
 
+// Add AppwriteService as singleton
+builder.Services.AddSingleton<AppwriteService>();
+
 // Add cors
 builder.Services.AddCors(options =>
 {
