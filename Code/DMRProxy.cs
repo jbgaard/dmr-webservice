@@ -436,7 +436,7 @@
                         {
                             var min = ParseInt(tokens[i + 2]);
                             var max = ParseInt(tokens[i + 4]);
-                            bildata.Teknisk.Karrosseri.AntalSidepladser = Math.Max(min, max);
+                            bildata.Teknisk.Karrosseri.AntalSiddepladser = Math.Max(min, max);
                             i += 2;
                         }
                         break;
