@@ -55,7 +55,7 @@
 
         public string FælgeDæk { get; set; }
 
-        public int AntalSidepladser { get; set; }
+        public int AntalSiddepladser { get; set; }
     }
 
     public class Miljø
