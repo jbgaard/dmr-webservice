@@ -1,4 +1,5 @@
 using DMRWebScrapper_service.Code;
+using DMRWebScrapper_service.Extensions;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => {
+    options.AddApiKeySecurityDefinition();
+});
+
+// Add configuration for API key
+builder.Configuration.AddEnvironmentVariables();
 
 // Add MongoDB client, read connection string from environment variable
 builder.Services.AddSingleton(new MongoClient(Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING") ?? "mongodb://localhost:27017"));
@@ -22,16 +28,13 @@ builder.Services.AddSingleton<VehicleViewService>();
 // Add PoliceReportService as singleton
 builder.Services.AddSingleton<PoliceReportService>();
 
-// Add AppwriteService as singleton
-builder.Services.AddSingleton<AppwriteService>();
-
 // Add cors
 builder.Services.AddCors(options =>
 {
 	options.AddDefaultPolicy(
-		builder =>
+		corsPolicyBuilder =>
 		{
-			builder.AllowAnyOrigin()
+			corsPolicyBuilder.AllowAnyOrigin()
 				.AllowAnyMethod()
 				.AllowAnyHeader();
 		});

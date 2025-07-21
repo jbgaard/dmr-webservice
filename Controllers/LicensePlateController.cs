@@ -1,4 +1,5 @@
 using Azure.Core;
+using DMRWebScrapper_service.Authentication;
 using DMRWebScrapper_service.Code;
 using DMRWebScrapper_service.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -29,12 +30,18 @@ namespace DMRWebScrapper_service.Controllers
         // Tools
         private readonly Tools _tools;
 
-        public LicensePlateController(ILogger<LicensePlateController> logger, DMRProxy proxy, VehicleViewService vehicleViewService, PoliceReportService policeReportService)
+        public LicensePlateController(ILogger<LicensePlateController> logger, DMRProxy proxy, VehicleViewService vehicleViewService, PoliceReportService policeReportService, IConfiguration configuration)
         {
             _logger = logger;
             _proxy = proxy;
             _vehicleViewService = vehicleViewService;
             _policeReportService = policeReportService;
+
+            // Get API key from configuration or environment variable with fallback
+            ADMIN_API_KEY = configuration.GetValue<string>("AdminApiKey") ?? 
+                           Environment.GetEnvironmentVariable("ADMIN_API_KEY") ?? 
+                           "MyVerySecretApiKey";
+
             _tools = new Tools(ADMIN_API_KEY);
         }
 
@@ -104,7 +111,7 @@ namespace DMRWebScrapper_service.Controllers
             {
 
                 // Create a new police check return object
-                PoliceCheckReturn policeCheckReturn = new PoliceCheckReturn(false, false, false, null, null);
+                Tools.PoliceCheckReturn policeCheckReturn = new Tools.PoliceCheckReturn(false, false, false, null, null);
 
                 // Get the data from the DMRProxy
                 BildataMin? bildata = await _proxy.HentOplysningerMin(nummerplade);
@@ -227,103 +234,56 @@ namespace DMRWebScrapper_service.Controllers
 
         // Get all police reports for a vehicle, only admin is allowed to do this
         [HttpGet("police/{nummerplade}/reports")]
+        [ApiKey]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserPoliceReportSummary))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPoliceReports(string nummerplade)
         {
             try
             {
-                // IF ADMIN API KEY is defined, allow all requests
-                if (_tools.isAdminKeyAllowedFromRequest(Request) == false)
-                {
-                    return Unauthorized();
-                }
-
                 // Get all police reports for a vehicle
                 var userPoliceReportSummary = _policeReportService.GetUserPoliceReportsForVehicleByRegNr(nummerplade);
-                    
+
+                if (userPoliceReportSummary == null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(userPoliceReportSummary);
             }
-            catch
-            (Exception ex)
+            catch (Exception ex)
             {
-                throw;
+                _logger.LogError(ex, "Error getting police reports for vehicle {Nummerplade}", nummerplade);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request");
             }
         }
 
         // Get all police reports for a user_identifier, only admin is allowed to do this
         [HttpGet("police/user/{userIdentifier}")]
+        [ApiKey]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPoliceReportsForUser(string userIdentifier)
         {
             try
             {
-                // IF ADMIN API KEY is defined, allow all requests
-                if (_tools.isAdminKeyAllowedFromRequest(Request) == false)
-                {
-                    return Unauthorized();
-                }
-
                 // Get all police reports for a user
                 var userPoliceReportObjects = _policeReportService.GetUserPoliceReportsForUser(userIdentifier);
 
+                if (userPoliceReportObjects == null || !userPoliceReportObjects.Any())
+                {
+                    return NotFound();
+                }
+
                 return Ok(userPoliceReportObjects);
             }
-            catch
-            (Exception ex)
+            catch (Exception ex)
             {
-                throw;
+                _logger.LogError(ex, "Error getting police reports for user {UserIdentifier}", userIdentifier);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request");
             }
-        }
-
-    }
-
-    public class Tools
-    {
-
-        // API_KEY
-        private readonly string ADMIN_API_KEY;
-
-        // Constructor
-        public Tools(string _adminApiKey)
-        {
-            ADMIN_API_KEY = _adminApiKey;
-        }
-
-        // Function to check if defined API_KEY is correct
-        private bool isAdminKeyAllowed(string key)
-        {
-            // Check if key is correct
-            return key == ADMIN_API_KEY;
-        }
-
-        // Function to check if defined API_KEY is correct, from http request
-        public bool isAdminKeyAllowedFromRequest(HttpRequest request)
-        {
-
-            // Get the API_KEY from the request
-            string? apiKey = request.Headers["X-API-KEY"];
-
-            // Check if key is correct
-            return isAdminKeyAllowed(apiKey ?? "DISALLOW");
-
-        }
-    }
-
-    // Class for returning police check
-    public class PoliceCheckReturn
-    {
-        public bool isPoliceCar { get; set; } = false;
-        public bool isUnconfirmedPoliceCar { get; set; } = false;
-        public bool isUserReported { get; set; } = false;
-        public UserPoliceReportSummary userPoliceReportSummary { get; set; }
-        public BildataMin bildata { get; set; }
-
-        // Constructor
-        public PoliceCheckReturn(bool isPoliceCar, bool isUnconfirmedPoliceCar, bool isUserReported, UserPoliceReportSummary userPoliceReportSummary, BildataMin bildata)
-        {
-            this.isPoliceCar = isPoliceCar;
-            this.isUnconfirmedPoliceCar = isUnconfirmedPoliceCar;
-            this.isUserReported = isUserReported;
-            this.userPoliceReportSummary = userPoliceReportSummary;
-            this.bildata = bildata;
         }
 
     }
