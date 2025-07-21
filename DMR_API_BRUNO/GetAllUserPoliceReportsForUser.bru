@@ -7,9 +7,11 @@ meta {
 get {
   url: {{base_url}}/api/police/user/{{user_identifier}}
   body: none
-  auth: none
+  auth: apikey
 }
 
-headers {
-  X-API-KEY: {{admin_api_key}}
+auth:apikey {
+  key: X-API-KEY
+  value: {{admin_api_key}}
+  placement: header
 }
